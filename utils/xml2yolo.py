@@ -12,7 +12,7 @@ def get_args_parser():
     return parser
 
 def xml2yolo(args):
-    """将数据集xml标签转化为单个train/test.txt的yolo格式标签"""
+    """将数据集xml标签转化为单个train/val.txt的yolo格式标签"""
     
     # 解析命令行参数
     xml_folder,save_folder = args.xml_folder,args.save_folder
@@ -27,7 +27,7 @@ def xml2yolo(args):
 
     # 划分数据集为训练与测试集
     f_train = open(os.path.join(save_folder,"train.txt"),"w",encoding = 'utf-8') # w为重写模式
-    f_test = open(os.path.join(save_folder,"test.txt"),"w",encoding = 'utf-8')
+    f_val = open(os.path.join(save_folder,"val.txt"),"w",encoding = 'utf-8')
 
     # 设置随机种子去划分
     import random
@@ -36,7 +36,7 @@ def xml2yolo(args):
     shuffled_data = random.sample(all_xml_files,len(all_xml_files)) # 打乱但不修改原数据
     split_idx = int(len(all_xml_files) * 0.8)
     train_xml_files = shuffled_data[:split_idx]
-    test_xml_files = shuffled_data[split_idx:]
+    val_xml_files = shuffled_data[split_idx:]
 
     # 处理训练集
     for xmlname in train_xml_files:
@@ -53,15 +53,15 @@ def xml2yolo(args):
             x_max = obj.find("bndbox/xmax").text
             y_min = obj.find("bndbox/ymin").text
             y_max = obj.find("bndbox/ymax").text
-            f_train.write(f"{x_min} {y_min} {x_max} {y_min} {class_map[obj_name]} ") # 按特定顺序写入文件
+            f_train.write(f"{x_min} {y_min} {x_max} {y_max} {class_map[obj_name]} ") # 按特定顺序写入文件
         f_train.write("\n")
 
     # 处理测试集
-    for xmlname in test_xml_files:
+    for xmlname in val_xml_files:
         tree = ET.parse(xmlname)
         root = tree.getroot()
         img_name = root.find("filename").text
-        f_test.write(f"{img_name} ")
+        f_val.write(f"{img_name} ")
         for obj in root.iter("object"):
             obj_name = obj.find("name").text
             if obj_name not in class_map:
@@ -71,12 +71,12 @@ def xml2yolo(args):
             x_max = obj.find("bndbox/xmax").text
             y_min = obj.find("bndbox/ymin").text
             y_max = obj.find("bndbox/ymax").text
-            f_test.write(f"{x_min} {y_min} {x_max} {y_min} {class_map[obj_name]} ") # 按特定顺序写入文件
-        f_test.write("\n")
+            f_val.write(f"{x_min} {y_min} {x_max} {y_max} {class_map[obj_name]} ") # 按特定顺序写入文件
+        f_val.write("\n")
 
     # 关闭文件
     f_train.close()
-    f_test.close()
+    f_val.close()
     print(f"Converted file save to {save_folder}/")
 
     # 检测类别数量是否符合
