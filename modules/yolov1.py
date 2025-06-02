@@ -38,7 +38,7 @@ def get_yolov1(num_classes = 20,num_bboxes = 2):
         nn.Linear(4096,7 * 7 * (num_bboxes * 5 + num_classes))
     )
 
-class yolov1(nn.Module):
+class Yolov1(nn.Module):
     def __init__(self,num_classes = 20,num_bboxes = 2):
         super().__init__()
         self.B = num_bboxes

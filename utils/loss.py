@@ -72,9 +72,12 @@ class YoloLoss(nn.Module):
         - loss: 计算得到的损失值
         """
         # target/pred = (N,C,H,W) -> (N,H,W,C)
+        device = target.device
         target = target.permute(0,2,3,1)
         pred = pred.permute(0,2,3,1)
         batch_size = pred.shape[0]
+
+        # breakpoint()
 
         # 设置临时参数，减少重复self引用
         S = self.S
@@ -103,7 +106,7 @@ class YoloLoss(nn.Module):
         class_target = coord_target[:,5 * B:]
 
         # 处理无目标位置的置信度损失
-        noobj_conf_mask = torch.BoolTensor(noobj_pred.shape).fill_(0)
+        noobj_conf_mask = torch.BoolTensor(noobj_pred.shape).fill_(0).to(device)
         for b in range(B):
             noobj_conf_mask[:,4 + b * 5] = 1 # 设置提取出置信度的位置
         noobj_conf_pred = noobj_pred[noobj_conf_mask]
@@ -113,9 +116,9 @@ class YoloLoss(nn.Module):
         loss_conf_noobj = F.mse_loss(noobj_conf_pred,noonj_conf_target,reduction = 'sum')
 
         # 初始化响应掩码
-        coord_response_mask = torch.BoolTensor(bbox_target.size()).fill_(0) # 响应初始化为0
-        coord_not_response_mask = torch.BoolTensor(bbox_target.size()).fill_(1) # 非响应初始化为1
-        bbox_target_iou = torch.zeros(bbox_target.size())
+        coord_response_mask = torch.BoolTensor(bbox_target.size()).fill_(0).to(device) # 响应初始化为0
+        coord_not_response_mask = torch.BoolTensor(bbox_target.size()).fill_(1).to(device) # 非响应初始化为1
+        bbox_target_iou = torch.zeros(bbox_target.size()).to(device)
 
         # 遍历每个目标网格
         for i in range(0,bbox_pred.shape[0],B):
@@ -123,13 +126,13 @@ class YoloLoss(nn.Module):
             pred = bbox_pred[i:i + B] 
 
             # 将预测边界框转换为 (xmin, ymin, xmax, ymax) 格式
-            pred_xyxy = torch.zeros((pred.shape[0],4))
+            pred_xyxy = torch.zeros((pred.shape[0],4)).to(device)
             pred_xyxy[:,:2] = pred[:,:2] * grid_size - pred[:,2:4] * 0.5    # 左上
             pred_xyxy[:,2:4] = pred[:,:2] * grid_size + pred[:,2:4] * 0.5   # 右下
 
             # 同样处理出目标坐标
             target = bbox_target[i].reshape(-1,5)
-            target_xyxy = torch.zeros((target.shape[0],4))
+            target_xyxy = torch.zeros((target.shape[0],4)).to(device)
             target_xyxy[:,:2] = target[:,:2] * grid_size - target[:,2:4] * 0.5    # 左上
             target_xyxy[:,2:4] = target[:,:2] * grid_size + target[:,2:4] * 0.5   # 右下
 
