@@ -9,3 +9,10 @@
 - datasets： 数据集存放位置，label为真实文件，原始图像为symbol link
 - raw_paper： yolov1的原始论文
 - utils： 存放常用功能脚本
+
+
+### 参考文献
+
+- yolo论文原文： https://arxiv.org/abs/1506.02640
+- 知乎解读yolo论文： https://zhuanlan.zhihu.com/p/70387154
+- github开源代码yolov1实现： https://github.com/yaoyi30/Pytorch_YOLOv1

@@ -4,7 +4,7 @@ import math
 from torchinfo import summary
 
 def get_yolov1(num_classes = 20,num_bboxes = 2):
-    """获取yolov1o模型"""
+    """获取yolov1模型"""
     return nn.Sequential(
         nn.Conv2d(3,64,kernel_size = 7,stride = 2,padding = 3),nn.LeakyReLU(),
         nn.MaxPool2d(2,2),                    # k = 2,s = 2的MaxPool2d层使图像分辨率减半
