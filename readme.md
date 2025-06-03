@@ -1,4 +1,4 @@
-## yolov1论文复现
+## YOLO-V1论文复现
 
 ### 背景
 
@@ -14,9 +14,24 @@
 - main.ipynb： 整体流程的构思过程
 - demo.ipynb： loss的调试
 
+### 模型结构说明
+
+模型整体架构为YOLO-V1论文里的架构的**改编版**，原模型如下
+
+![](readme_images/a.png)
+
+- backbone为VGG架构，Detect_head为两个全连接层.
+- 激活函数将论文中的LeakyReLU改为了全Relu，因为图像的归一化操作及后续的loss计算都要求元素的范围是大于0的.
+- **论文的关键点：每个grid的预选框仅一个有效，从loss计算到后处理均是.**
+
+### 后续规划
+
+- 完善命令行给参数，实现训练、预测
+- 模型效果很差，检查数据集处理、loss设计、推理算法
+
 ### 个人理解 + 收获
 
-#### pytorch中mask的灵活运用
+#### 一、pytorch中mask的灵活运用
 
 参考loss.py中的实现，发现许多操作都是mask提取实现的，如从一些连续的tensor中提取出某个部分，我们可以先生成对应的mask然后reshape即可.
 
@@ -42,10 +57,39 @@ coord_mask = coord_mask.unsqueeze(-1).expand_as(target)
 coord_target = target[coord_mask].reshape(-1, 5 * B + C)
 ```
 
-#### 激活函数Relu的作用
+#### 二、激活函数Relu的作用
 
 搞了这么久终于理解了为什么要用Relu了，呜呜呜，原来目标检测任务后续的很多操作，如归一化，开根号等操作均要求值大于0,否则NAN！
 
+#### 三、torch.cat与torch.stack的区别
+
+torch.cat主要用于拼接，而torch.stack用于将列表维度转化为tensor维度，一个简单的例子
+
+```py
+x1 = torch.rand((7,7,30))
+x2 = torch.rand((7,7,30))
+x = [x1,x2]
+y1 = torch.stack(x,dim = 0)
+y2 = torch.cat(x,dim = 0)
+print(y1.shape)
+print(y2.shape)
+# 输出
+# torch.Size([2, 7, 7, 30])
+# torch.Size([14, 7, 30])
+```
+
+#### 四、非极大值抑制(NMS)在目标检测框的应用
+
+非极大值抑制的流程如下：
+
+- 根据置信度得分进行排序
+- 选择置信度最高的比边界框添加到最终输出列表中，将其从边界框列表中删除
+- 计算所有边界框的面积
+- 计算置信度最高的边界框与其它候选框的IoU。
+- 删除IoU大于阈值的边界框
+- 重复上述过程，直至边界框列表为空。
+
+参考：https://zhuanlan.zhihu.com/p/37489043
 
 ### 参考文献
 

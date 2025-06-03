@@ -80,8 +80,12 @@ def xml2yolo(args):
     print(f"Converted file save to {save_folder}/")
 
     # 检测类别数量是否符合
-    # print(class_map)
+    import joblib
+    print(class_map)
     print(f"Dataset have {class_nums} classes!") # 预期20类
+
+    # 保存类别映射字典
+    joblib.dump(class_map,os.path.join(save_folder,"class_map.joblib"))
 
 if __name__ == "__main__":
     parser = get_args_parser()

@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     net = Yolov1()
 
-    lr = 5e-4
+    lr = 1e-3
     loss = YoloLoss()
     trainer = torch.optim.SGD(net.parameters(), lr=lr)
 
