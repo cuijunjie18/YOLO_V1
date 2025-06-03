@@ -1,20 +1,11 @@
 import torch
-import torchvision
-import argparse
-from torch import nn
 from tqdm import tqdm
-from utils.net_frame import *
-from utils.loss import YoloLoss
-from utils.datasets import YoloData
-from modules.yolov1 import Yolov1
-
-def get_args_parser():
-    parser = argparse.ArgumentParser('YOLOV1 for train', add_help = False)
-    parser.add_argument('--',default = "VOC2012/Annotations",
-                        type = str,help = "Path to raw xml-files.")
-    parser.add_argument('--save_folder',default = "datasets",
-                        type = str,help = "Path to save file converted.")
-    return parser
+from utils.net_frame import try_gpu
+from torch import nn
+import joblib
+import matplotlib.pyplot as plt
+import numpy as np
+import os
 
 # 定义训练函数
 def train(net,trainer,train_iter,test_iter,loss_fn,lr,num_epochs,devices_idx = None):
@@ -72,35 +63,8 @@ def train(net,trainer,train_iter,test_iter,loss_fn,lr,num_epochs,devices_idx = N
         loss_plt.append(loss_temp / total_nums)
     return loss_plt
 
-if __name__ == "__main__":
-    # parser = get_args_parser()
-    # args = parser.parse_args()
-    # 定义图像transforms
-    transforms = torchvision.transforms.Compose(
-        [torchvision.transforms.Normalize(
-            mean = [0.485, 0.456, 0.406],
-            std  = [0.229, 0.224, 0.225]
-        ),torchvision.transforms.Resize((448,448))]
-    )
-
-    # 加载数据集
-    yolodata = YoloData("datasets/JPEGImages","datasets/train.txt",transforms = transforms)
-
-    batch_size = 32
-    train_iter = data.DataLoader(yolodata,batch_size,shuffle = True)
-
-    net = Yolov1()
-
-    lr = 5e-4
-    loss = YoloLoss()
-    trainer = torch.optim.SGD(net.parameters(), lr=lr)
-
-    plt_loss = train(net,trainer,train_iter,test_iter = None,loss_fn = loss,
-                 num_epochs = 20,lr = lr,devices_idx = [7])
-
-    import joblib
-    import os
-    save_prefix = "results/exp2"
-    os.makedirs(save_prefix,exist_ok = True)
-    joblib.dump(plt_loss,os.path.join(save_prefix,"plt_loss.joblib"))
-    torch.save(net,os.path.join(save_prefix,"best.pt"))
+def show_loss(data_path,save_path):
+    plt_loss = joblib.load(data_path)
+    plt.plot(np.arange(len(plt_loss)),plt_loss,label = "Train_Loss",marker = 'o')
+    plt.legend()
+    plt.savefig(save_path)

@@ -168,6 +168,8 @@ class YoloLoss(nn.Module):
         # 计算类别预测损失
         loss_class = F.mse_loss(class_pred,class_target,reduction = 'sum')
 
+        # breakpoint()
+
         loss = (self.lambda_coord * (loss_xy + loss_wh) + 
                 self.lambda_noobj * loss_conf_noobj +
                 loss_conf + loss_class)
