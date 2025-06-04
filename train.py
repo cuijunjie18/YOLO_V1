@@ -17,7 +17,7 @@ def get_args_parser():
     return parser
 
 # 定义训练函数
-def train(net,trainer,train_iter,test_iter,loss_fn,lr,num_epochs,devices_idx = None):
+def train(net,trainer,train_iter,scheduler,loss_fn,lr,num_epochs,devices_idx = None):
     """训练情感分析模型"""
     # 设置设备
     if devices_idx == None:
@@ -68,7 +68,8 @@ def train(net,trainer,train_iter,test_iter,loss_fn,lr,num_epochs,devices_idx = N
             
             # # update parameters
             # trainer.step()
-            loop.set_postfix({"LOSS" : loss_temp / total_nums,"lr" : "{:e}".format(trainer.param_groups[0]['lr'])})
+            loop.set_postfix({"LOSS" : loss_temp / total_nums,"lr" : "{:e}".format(scheduler.get_last_lr()[0])})
+        scheduler.step()
         loss_plt.append(loss_temp / total_nums)
     return loss_plt
 
@@ -91,16 +92,18 @@ if __name__ == "__main__":
 
     net = Yolov1()
 
-    lr = 1e-3
+    num_epochs = 150
+    lr = 5e-4
     loss = YoloLoss()
     trainer = torch.optim.SGD(net.parameters(), lr=lr)
+    scheduler = torch.optim.lr_scheduler.StepLR(trainer,step_size = num_epochs * 0.4,gamma = 0.1)
 
-    plt_loss = train(net,trainer,train_iter,test_iter = None,loss_fn = loss,
-                 num_epochs = 20,lr = lr,devices_idx = [7])
+    plt_loss = train(net,trainer,train_iter,scheduler,loss_fn = loss,
+                 num_epochs = num_epochs,lr = lr,devices_idx = [7])
 
     import joblib
     import os
-    save_prefix = "results/exp2"
+    save_prefix = "results/exp4"
     os.makedirs(save_prefix,exist_ok = True)
     joblib.dump(plt_loss,os.path.join(save_prefix,"plt_loss.joblib"))
     torch.save(net,os.path.join(save_prefix,"best.pt"))

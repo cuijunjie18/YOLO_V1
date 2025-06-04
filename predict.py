@@ -6,8 +6,8 @@ import cv2
 if __name__ == "__main__":
 
     # 加载模型与图片
-    model = torch.load('results/exp1/best.pt')
-    img_path = "datasets/JPEGImages/2010_002814.jpg"
+    model = torch.load('results/exp4/best.pt')
+    img_path = "datasets/JPEGImages/2012_002895.jpg"
 
     # 加载class_map
     class_map = joblib.load("datasets/class_map.joblib")
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     input_tensor = preprocess(img_path,transforms)
     out_tensor = model_infer(model,input_tensor,device_idx = 7)
     boxes,labels,probs = postprocess(out_tensor,448,448,VOC_CLASS,grid_size = 7,num_bboxes = 2,
-                                    conf_thresh = 0.1,prob_thresh = 0.1,nms_thresh = 0.5,nb_classes = 20)
+                                    conf_thresh = 0.3,prob_thresh = 0.3,nms_thresh = 0.5,nb_classes = 20)
     
 
     img_origin = cv2.imread(img_path)
