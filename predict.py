@@ -2,12 +2,24 @@ import torch
 import torchvision
 from utils.engine import *
 import cv2
+import argparse
+
+def get_args_parser():
+    parser = argparse.ArgumentParser('YOLOV1 for predict', add_help = False)
+    parser.add_argument('--model_path',default = "results/exp1/best.pt",type = str,
+                        help = "Model path for loading.")
+    parser.add_argument('--img_path',required = True,type = str,help = "Please input img path.")
+    parser.add_argument('--output_dir',default = 'results/predict',type = str,
+                        help = "The predicted img folder.")
+    return parser
 
 if __name__ == "__main__":
+    parser = get_args_parser()
+    args = parser.parse_args()
 
     # 加载模型与图片
-    model = torch.load('results/exp4/best.pt')
-    img_path = "datasets/JPEGImages/2012_002895.jpg"
+    model = torch.load(args.model_path)
+    img_path = args.img_path
 
     # 加载class_map
     class_map = joblib.load("datasets/class_map.joblib")
@@ -38,7 +50,7 @@ if __name__ == "__main__":
         label_show = f"{labels[i]} {probs[i]:.2f}"
         cv2.rectangle(img, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0, 255, 0), 1)
         cv2.putText(img, label_show, (int(x_min), int(y_min) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-    os.makedirs("results/predict",exist_ok = True)
-    cv2.imwrite("results/predict/1.png",img)
-    print(f"Predict result save in results/predict/1.png!")
+    os.makedirs(args.output_dir,exist_ok = True)
+    cv2.imwrite(os.path.join(args.output_dir,"predict.png"),img)
+    print(f"Predict result save in {os.path.join(args.output_dir,'predict.png')}")
     

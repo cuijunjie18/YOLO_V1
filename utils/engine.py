@@ -9,8 +9,8 @@ import os
 import torchvision
 
 # 定义训练函数
-def train(net,trainer,train_iter,test_iter,loss_fn,lr,num_epochs,devices_idx = None):
-    """训练情感分析模型"""
+def train(net,trainer,train_iter,scheduler,loss_fn,lr,num_epochs,devices_idx = None):
+    """支持多卡的训练"""
     # 设置设备
     if devices_idx == None:
         device = try_gpu(i = 0)
@@ -60,7 +60,8 @@ def train(net,trainer,train_iter,test_iter,loss_fn,lr,num_epochs,devices_idx = N
             
             # # update parameters
             # trainer.step()
-            loop.set_postfix({"LOSS" : loss_temp / total_nums,"lr" : "{:e}".format(trainer.param_groups[0]['lr'])})
+            loop.set_postfix({"LOSS" : loss_temp / total_nums,"lr" : "{:e}".format(scheduler.get_last_lr()[0])})
+        scheduler.step()
         loss_plt.append(loss_temp / total_nums)
     return loss_plt
 
