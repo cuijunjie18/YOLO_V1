@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     # 加载模型与图片
     model = torch.load('results/exp1/best.pt')
-    img_path = "datasets/JPEGImages/2007_000027.jpg"
+    img_path = "datasets/JPEGImages/2010_002814.jpg"
 
     # 加载class_map
     class_map = joblib.load("datasets/class_map.joblib")

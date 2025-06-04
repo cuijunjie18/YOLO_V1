@@ -35,7 +35,7 @@ def get_yolov1(num_classes = 20,num_bboxes = 2):
         nn.Conv2d(1024,1024,3,padding = 1),nn.ReLU(),
         nn.Conv2d(1024,1024,3,padding = 1),nn.ReLU(),
         nn.Flatten(),nn.Linear(7 * 7 * 1024,4096),nn.ReLU(),
-        nn.Linear(4096,7 * 7 * (num_bboxes * 5 + num_classes)),nn.ReLU()
+        nn.Linear(4096,7 * 7 * (num_bboxes * 5 + num_classes)),nn.Sigmoid()
     )
 
 class Yolov1(nn.Module):

@@ -11,8 +11,12 @@
 - utils： 存放常用功能脚本
 - modules： 模型的组件
 - train.py： 训练脚本
+- predict.py： 预测脚本
+- visual.py： 训练结果可视化脚本
 - main.ipynb： 整体流程的构思过程
+- data_preprocess.ipynb： 数据预处理构思流程
 - demo.ipynb： loss的调试
+- debug.ipynb： 过拟合测试
 
 ### 模型结构说明
 
@@ -90,6 +94,10 @@ print(y2.shape)
 - 重复上述过程，直至边界框列表为空。
 
 参考：https://zhuanlan.zhihu.com/p/37489043
+
+#### 五、sigmoid激活函数的应用
+
+原本的全连接层后用**Relu函数**作为输出层的激活函数，loss收敛后效果仍旧很差，**recall率几乎为0**,可能认为不检测的loss还比检测到的小，于是模型错误地往这个方向去收敛了，故我们把模型的最后一层激活函数换成了sigmoid激活函数，让输出层的结果均在[0,1]范围，符合检测框的物理意义，最后对单个图片过拟合还是可以的.
 
 ### 参考文献
 
